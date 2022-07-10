@@ -1,0 +1,129 @@
+#Create 2 pipes for bliting on screen
+    newPipe1 = getRandomPipe()
+    rock = getRandomPipe()
+
+
+    #list of upper pipes
+    upperPipes = [
+        {'x': SCREENWIDTH+200, 'y': rock[0]['y']},
+        {'x': SCREENWIDTH+200 + (SCREENWIDTH/2), 'y': rock[0]['y']}
+    ]
+    #list of lower pipes
+    lowerPipes = [
+        {'x': SCREENWIDTH + 200, 'y': newPipe1[1]['y']},
+        {'x': SCREENWIDTH + 200 + (SCREENWIDTH / 2), 'y': newPipe1[1]['y']}
+    ]
+
+    pipeVelX = -4
+    playerVely = -9
+    playerMaxVely = 10
+    playerMinvely = -8
+    playerAccVely = 1
+    playerFlapAccv = -8 #velocity while flapping
+    playerFlapped = False #its true only while player is flapping
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                pygame.quit()
+                sys.exit()
+            if event.type == KEYDOWN and (event.type == K_SPACE or event.key == K_UP):
+                if playery > 0:
+                    playerVely = playerFlapAccv
+                    playerFlapped = True
+                    GAME_SOUNDS['wing'].play()
+
+        crashTest =  isCollide(playerx, playery, upperPipes, lowerPipes)
+        #this function will return if the player crashed
+        if crashTest:
+            return
+
+        #check for score
+        playerMidpos = playerx + GAME_SPRITES['player'].get_width()/2
+        for pipe in upperPipes:
+            pipeMidpos = pipe['x'] + GAME_SPRITES['pipe'].get_width()/2
+            if pipeMidpos <= playerMidpos < pipeMidpos + 4:
+                score += 1
+                print(f"Your score is {score}")
+            GAME_SOUNDS['point'].play()
+
+        if playerVely < playerMaxVely and not playerFlapped:
+            playerVely += playerAccVely
+
+        if playerFlapped:
+            playerFlapped = False
+        playerHeight = GAME_SPRITES['player'].get_height()
+        playery = playery + min(playerVely, GROUNDY - playery - playerHeight)
+
+        #move pipes to the left
+        for upperPipe, lowerpipe in zip(upperPipes, lowerPipes):
+            upperPipe['x'] += pipeVelX
+            lowerpipe['x'] += pipeVelX
+
+        #add a new pipe when the first pipe about to go left
+        if 0<upperPipes[0]['x']<5:
+            newpipe = getRandomPipe()
+            upperPipes.append(newpipe[0])
+            lowerPipes.append(newpipe[1])
+
+        #if pipe is out of the screen, remove it
+        if upperPipes[0]['x'] < -GAME_SPRITES['pipe'].get_width():
+            upperPipes.pop(0)
+            lowerPipes.pop(0)
+
+        #Lets blit our spries now!
+        SCREEN.blit(GAME_SPRITES['background'], (0, 0))
+        for upperPipe, lowerPipe in zip(upperPipes, lowerPipes):
+            SCREEN.blit(GAME_SPRITES['rock'], (upperPipe['x'], upperPipe['y']))
+            SCREEN.blit(GAME_SPRITES['pipe'], (lowerPipe['x'], lowerPipe['y']))
+
+        SCREEN.blit(GAME_SPRITES['base'], (basex, GROUNDY))
+        SCREEN.blit(GAME_SPRITES['player'], (playerx, playery))
+        myDigits = [int(x) for x in list(str(score))]
+        width = 0
+        for digit in myDigits:
+            width+= GAME_SPRITES['numbers'][digit].get_width()
+        xoffset = (SCREENWIDTH - width)/2
+
+        for digit in myDigits:
+            SCREEN.blit(GAME_SPRITES['numbers'][digit], (xoffset, SCREENHEIGHT*0.12))
+        xoffset += GAME_SPRITES['numbers'][digit].get_width()
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
+
+
+            else:
+                SCREEN.blit(GAME_SPRITES['message'], (0, 0))
+                pygame.display.update()
+                FPSCLOCK.tick(FPS)
+
+
+            else:
+                SCREEN.blit(GAME_SPRITES['message'], (0, 0))
+                pygame.display.update()
+                FPSCLOCK.tick(FPS)
+
+
+def getRandomPipe():
+    #generate position of 2 pipes for bliting on screen
+    pipeHeight= GAME_SPRITES['pipe'].get_height()
+    offset = SCREENHEIGHT/3
+    y2 = offset + random.randrange(0, int(SCREENHEIGHT- GAME_SPRITES['base'].get_height() - 1.2*offset))
+    pipeX = SCREENWIDTH + 10
+    y1 = pipeHeight - y2 + offset
+    pipe = [
+        {'x': pipeX, 'y': -y1},#upper Pipe
+        {'x': pipeX, 'y': y2}#lower pipe
+    ]
+    return pipe
+
+
+MY TESTING SCRIPT
+SCREEN.blit(GAME_SPRITES['background'], (0, 0))
+    SCREEN.blit(GAME_SPRITES['pipe'], (newPipe1[0]['x'], newPipe1[0]['y']))
+    SCREEN.blit(GAME_SPRITES['rock'], (newRock1[0]['x'], newRock1[0]['y']))
+    SCREEN.blit(GAME_SPRITES['base'], (0, GROUNDY))
+    SCREEN.blit(GAME_SPRITES['player'], (playerx, playery))
+    pygame.display.update()
+    FPSCLOCK.tick(FPS)
+    time.sleep(5)
